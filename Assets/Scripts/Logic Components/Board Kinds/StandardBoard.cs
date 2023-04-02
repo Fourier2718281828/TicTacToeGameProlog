@@ -10,7 +10,11 @@ namespace App.Logic_Components.Boards
         private readonly int _Rows;
         private readonly int _Cols;
 
-        public BoardValues this[int index] => _Values[index];
+        public int Rows => _Rows;
+
+        public int Cols => _Cols;
+
+        public BoardValues this[int m, int n] => _Values[m * Cols + n];
 
         StandardBoard(int rows, int cols) : 
             this(rows, cols, Enumerable.Repeat(BoardValues.EMPTY, rows * cols).ToList())
