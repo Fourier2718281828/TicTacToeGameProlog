@@ -16,20 +16,20 @@ namespace App.Logic_Components.Boards
 
         public BoardValues this[int m, int n] => _Values[m * Cols + n];
 
-        StandardBoard(int rows, int cols) : 
+        public StandardBoard(int rows, int cols) : 
             this(rows, cols, Enumerable.Repeat(BoardValues.EMPTY, rows * cols).ToList())
         { }
 
-        StandardBoard(int rows, int cols, IEnumerable<BoardValues> values)
+        public StandardBoard(int rows, int cols, IEnumerable<BoardValues> values)
         {
             _Values = values.ToList();
             _Rows = rows;
             _Cols = cols;
         }
 
-        public bool IsFinal()
+        public override string ToString()
         {
-            throw new NotImplementedException();
+            return "[" + string.Join(", ", _Values.Select(n => (int)n)) + "]";
         }
     }
 }

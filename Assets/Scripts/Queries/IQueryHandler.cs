@@ -4,6 +4,7 @@ namespace App.Queries
 {
     public interface IQueryHandler
     {
-        public IBoard NextBoard();
+        public IBoard NextBoard(IBoard currBoard);
+        public bool IsFinalBoard();
     }
 }
