@@ -11,14 +11,15 @@ namespace App.Queries
     public class QueryHandler : IQueryHandler
     {
         private delegate void SolutionValuesProcessor(string nxtVal);
-        private const string PROLOG_FILENAME = "Assets/Prolog/Minimax.pl";
-        private const string PROLOG_SET_BOARD_VALUE_NAME = "set_board_value";
+        private const string PL_FILENAME = "Assets/Prolog/Minimax.pl";
+        private const string PL_SET_BOARD_VALUE_NAME = "set_board_value";
+        private const string PL_NEXT_TURN_NAME = "next_turn";
         private PrologEngine _swipl;
 
         public QueryHandler()
         {
             _swipl = new PrologEngine(persistentCommandHistory : false);
-            _swipl.Consult(PROLOG_FILENAME);
+            _swipl.Consult(PL_FILENAME);
             SetBoardValues();
             var lst = new List<BoardValues>();
             lst.Add((BoardValues)0);
@@ -30,7 +31,7 @@ namespace App.Queries
 
         public IBoard NextBoard(IBoard currBoard)
         {
-            ExecuteQuery(QueryFormat(true, "next_board", currBoard.ToString(), "X"));
+            ExecuteQuery(QueryFormat(true, PL_NEXT_TURN_NAME, currBoard.ToString(), "X"));
             ProcessSolutions
             (
                 val => 
@@ -38,11 +39,6 @@ namespace App.Queries
                     Debug.Log(val);
                 }
             );
-            return null;
-        }
-
-        private IBoard parseBoard(string str)
-        {
             return null;
         }
 
@@ -77,7 +73,7 @@ namespace App.Queries
             => ExecuteQuery(QueryFormat
                 (
                     false, 
-                    PROLOG_SET_BOARD_VALUE_NAME, 
+                    PL_SET_BOARD_VALUE_NAME, 
                     name, 
                     value.ToString()
                 ));
