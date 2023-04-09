@@ -23,11 +23,30 @@ max(_, Y, Y).
 mydiv(Dividend, Divisor, Quotient) :-
     Quotient is Dividend // Divisor.
 
-nth0(0, [X|_], X).
-nth0(N, [_|T], X) :-
-    N > 0,
-    N1 is N - 1,
-    nth0(N1, T, X).
+nth0(0, [Head|_], Head) :- !.
+
+nth0(N, [_|Tail], Elem) :-
+    nonvar(N),
+    M is N-1,
+    nth0(M, Tail, Elem).
+
+nth0(N,[_|T],Item) :-       
+    var(N),         
+    nth0(M,T,Item),
+    N is M + 1.
+
+nth0(0, [Head|Tail], Head, Tail) :- !.
+
+nth0(N, [Head|Tail], Elem, [Head|Rest]) :-
+    nonvar(N),
+    M is N-1,
+    nth0(M, Tail, Elem, Rest).
+
+nth0(N, [Head|Tail], Elem, [Head|Rest]) :-  
+    var(N),                
+    nth0(M, Tail, Elem, Rest),     
+    N is M+1.
+
 
     
 grid_index(Index, I, J) :-

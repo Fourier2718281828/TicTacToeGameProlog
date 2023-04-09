@@ -4,7 +4,6 @@ using Prolog;
 using System.Collections.Generic;
 using System;
 using App.Queries.Formatting;
-
 using UnityEngine;
 
 namespace App.Queries
@@ -31,6 +30,7 @@ namespace App.Queries
         {
             const int m = 3, n = 3;
             _swipl.Consult(PL_FILENAME);
+
             //SetBoardValues();
             //SetPrologDimensions(m, n);
 
@@ -51,12 +51,20 @@ namespace App.Queries
             };
             IBoard curr = new StandardBoard(m, n, lst);
             VictorySequences(curr);
+            NextBoard(curr, BoardValues.NAUGHT);
         }
 
         #region IBoard Methods
-        public IBoard NextBoard(IBoard currBoard)
+        public IBoard NextBoard(IBoard currBoard, BoardValues currentPlayer)
         {
-            ExecuteQuery(QueryFormat(true, PL_NEXT_TURN_NAME, _formatter.ToPrologFormat(currBoard), "X"));
+            ExecuteQuery(QueryFormat
+            (
+                true, 
+                PL_NEXT_TURN_NAME,
+                _formatter.ToPrologFormat(currBoard),
+                ((int)currentPlayer).ToString(),
+                "X"
+            ));
             ProcessSolutions
             (
                 val => 
