@@ -1,0 +1,37 @@
+next_turn([1, 0, 0], 1, R).
+
+Fail: (12) is_victory_board([1, 1, 0], _120) ? creep
+   Redo: (11) process_next_board([1, 1, 0], 1, max, [], _118) ? creep
+   Call: (12) opponent(1, _28376) ? creep
+   Call: (13) cross(1) ? creep
+   Fail: (13) cross(1) ? creep
+   Redo: (12) opponent(1, _28376) ? creep
+   Call: (13) naught(1) ? creep
+   Exit: (13) naught(1) ? creep
+   Call: (13) cross(_28376) ? creep
+   Exit: (13) cross(2) ? creep
+   Exit: (12) opponent(1, 2) ? creep
+   Call: (12) opposite_comparator(max, _35644) ? creep
+   Exit: (12) opposite_comparator(max, min) ? creep
+   Call: (12) _37266=[eval_unit_gain, min, [1, 1, 0], 2] ? creep
+   Exit: (12) [eval_unit_gain, min, [1, 1, 0], 2]=[eval_unit_gain, min, [1, 1, 0], 2] ? creep
+   Call: (12) writeln([eval_unit_gain, min, [1, 1, 0], 2]) ? creep
+[eval_unit_gain,min,[1,1,0],2]
+   Exit: (12) writeln([eval_unit_gain, min, [1, 1, 0], 2]) ? creep
+   Call: (12) for_each([eval_unit_gain, min, [1, 1, 0], 2], [1, 1, 0], [], _118) ? creep
+   Call: (13) for_each_util([eval_unit_gain, min, [1, 1, 0], 2], [1, 1, 0], 0, [], _118) ? creep
+^  Call: (14) apply([eval_unit_gain, min, [1, 1, 0], 2], [1, 0, [], _42184]) ? creep
+   Call: (15) lists:append([eval_unit_gain, min, [1, 1, 0], 2], [1, 0, [], _42184], _43010) ? creep
+   Exit: (15) lists:append([eval_unit_gain, min, [1, 1, 0], 2], [1, 0, [], _42184], [eval_unit_gain, min, [1, 1, 0], 2, 1, 0, []|...]) ? creep
+   Call: (15) _44688=..[eval_unit_gain, min, [1, 1, 0], 2, 1, 0, [], _42184] ? creep
+   Exit: (15) eval_unit_gain(min, [1, 1, 0], 2, 1, 0, [], _42184)=..[eval_unit_gain, min, [1, 1, 0], 2, 1, 0, [], _42184] ? creep
+   Call: (15) eval_unit_gain(min, [1, 1, 0], 2, 1, 0, [], _42184) ? creep
+   Call: (16) empty(1) ? creep
+   Fail: (16) empty(1) ? creep
+   Fail: (15) eval_unit_gain(min, [1, 1, 0], 2, 1, 0, [], _42184) ? creep
+^  Fail: (14) apply([eval_unit_gain, min, [1, 1, 0], 2], [1, 0, [], _42184]) ? creep
+   Fail: (13) for_each_util([eval_unit_gain, min, [1, 1, 0], 2], [1, 1, 0], 0, [], _118) ? creep
+   Fail: (12) for_each([eval_unit_gain, min, [1, 1, 0], 2], [1, 1, 0], [], _118) ? creep
+   Fail: (11) process_next_board([1, 1, 0], 1, max, [], _118) ? creep
+   Fail: (10) eval_unit_gain(max, [1, 0, 0], 1, 0, 1, [], _18) ? creep
+false.
