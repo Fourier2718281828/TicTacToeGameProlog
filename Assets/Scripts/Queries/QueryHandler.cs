@@ -2,9 +2,10 @@ using App.Logic_Components.Boards;
 using App.Logic_Components;
 using Prolog;
 using System.Collections.Generic;
+using System;
+using App.Queries.Formatting;
 
 using UnityEngine;
-using System;
 
 namespace App.Queries
 {
@@ -13,25 +14,49 @@ namespace App.Queries
         private delegate void SolutionValuesProcessor(string nxtVal);
         private const string PL_FILENAME = "Assets/Prolog/Minimax.pl";
         private const string PL_SET_BOARD_VALUE_NAME = "set_board_value";
+        private const string PL_SET_DIMENSIONS_NAME = "set_dimensions";
+        private const string PL_VICTORY_SEQUENCES_NAME = "all_victory_sequences";
         private const string PL_NEXT_TURN_NAME = "next_turn";
+        private IBoardPrologFormatter _formatter;
         private PrologEngine _swipl;
 
-        public QueryHandler()
+        public QueryHandler(IBoardPrologFormatter formatter)
         {
+            _formatter = formatter;
             _swipl = new PrologEngine(persistentCommandHistory : false);
-            _swipl.Consult(PL_FILENAME);
-            SetBoardValues();
-            var lst = new List<BoardValues>();
-            lst.Add((BoardValues)0);
-            lst.Add((BoardValues)1);
-            lst.Add((BoardValues)2);
-            IBoard curr = new StandardBoard(1, 2, lst); 
-            NextBoard(curr);
+            InitSwipl();
         }
 
+        private void InitSwipl()
+        {
+            const int m = 3, n = 3;
+            _swipl.Consult(PL_FILENAME);
+            //SetBoardValues();
+            //SetPrologDimensions(m, n);
+
+
+            BoardValues[] lst = new BoardValues[m * n]
+            {
+                BoardValues.NAUGHT,
+                BoardValues.NAUGHT,
+                BoardValues.NAUGHT,
+                
+                BoardValues.EMPTY,
+                BoardValues.NAUGHT,
+                BoardValues.EMPTY,
+
+                BoardValues.EMPTY,
+                BoardValues.EMPTY,
+                BoardValues.NAUGHT,
+            };
+            IBoard curr = new StandardBoard(m, n, lst);
+            VictorySequences(curr);
+        }
+
+        #region IBoard Methods
         public IBoard NextBoard(IBoard currBoard)
         {
-            ExecuteQuery(QueryFormat(true, PL_NEXT_TURN_NAME, currBoard.ToString(), "X"));
+            ExecuteQuery(QueryFormat(true, PL_NEXT_TURN_NAME, _formatter.ToPrologFormat(currBoard), "X"));
             ProcessSolutions
             (
                 val => 
@@ -42,10 +67,26 @@ namespace App.Queries
             return null;
         }
 
+        public IEnumerable<IEnumerable<int>> VictorySequences(IBoard currBoard) 
+        {
+            ExecuteQuery(QueryFormat(false, PL_VICTORY_SEQUENCES_NAME, _formatter.ToPrologFormat(currBoard), "X"));
+            ProcessSolutions
+            (
+                val => 
+                {
+                    Debug.Log(val);
+                }
+            );
+            return null;
+        }
+        #endregion
+
+        #region Prolog Interaction
         private void ProcessSolutions(SolutionValuesProcessor processor)
         {
             foreach (var solution in _swipl.SolutionIterator)
             {
+                Debug.Log(solution.ToString());
                 foreach (var f in solution.VarValuesIterator)
                 {
                     var strRep = f.Value.ToString();
@@ -55,6 +96,15 @@ namespace App.Queries
         }
 
         private void ExecuteQuery(string query) => _swipl.Query = query;
+
+        private void SetPrologDimensions(int m, int n)
+            => ExecuteQuery(QueryFormat
+               (
+                   false,
+                   PL_SET_DIMENSIONS_NAME,
+                   m.ToString(), 
+                   n.ToString()
+               ));
 
         private void SetBoardValues()
         {
@@ -101,13 +151,9 @@ namespace App.Queries
             res += cut 
                 ? "),!."
                 : ").";
-
+            Debug.Log("Query: " + res);
             return res;
         }
-
-        public bool IsFinalBoard()
-        {
-            throw new NotImplementedException();
-        }
+        #endregion
     }
 }

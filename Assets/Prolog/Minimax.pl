@@ -4,7 +4,21 @@
 :- dynamic m/1.
 :- dynamic n/1.
 
-setup() :- set_board_value(cross, 1), set_board_value(naught, -1), set_board_value(empty, 0).
+m(3).
+n(3).
+empty(0).
+naught(1).
+cross(2).
+%setup() :- set_board_value(cross, 1), set_board_value(naught, -1), set_board_value(empty, 0).
+mydiv(Dividend, Divisor, Quotient) :-
+    Quotient is Dividend // Divisor.
+
+nth0(0, [X|_], X).
+nth0(N, [_|T], X) :-
+    N > 0,
+    N1 is N - 1,
+    nth0(N1, T, X).
+
 
 set_board_value(BoardValue, Num) :-
     ToRemove =.. [BoardValue, _],
@@ -21,7 +35,7 @@ grid_index(Index, I, J) :-
     (var(Index) ->
         Index is N*I + J
     ;
-        I is Index div N,
+        mydiv(Index, N, I),
         J is Index mod N
     ).
 
@@ -69,62 +83,22 @@ within_one_col(Index0, Index1, Index2) :-
 
 within_one_dgn(_, _, _) :- true.
 
-all_victory_sequences(Board, ShiftPArgs, CheckIndexTripletPArgs, Sequences) :-
+partial_victory_sequences(Board, ShiftPArgs, CheckIndexTripletPArgs, Sequences) :-
     PArgs = [find_win_sequence, Board, ShiftPArgs, CheckIndexTripletPArgs],
     for_each(PArgs, Board, [], Sequences).
 
 all_victory_rows(Board, Rows) :-
-    all_victory_sequences(Board, [shift_rght], [within_one_row], Rows).
+    partial_victory_sequences(Board, [shift_rght], [within_one_row], Rows).
 
 all_victory_cols(Board, Cols) :-
-    all_victory_sequences(Board, [shift_down], [within_one_col], Cols).
+    partial_victory_sequences(Board, [shift_down], [within_one_col], Cols).
 
 all_victory_dgns(Board, Dgns) :-
-    all_victory_sequences(Board, [shift_diag], [within_one_dgn], Dgns).
+    partial_victory_sequences(Board, [shift_diag], [within_one_dgn], Dgns).
 
-% victory_row (Board, M, N, Winner).
-% victory_col (Board, M, N, Winner).
-% victory_diag(Board, M, N, Winner).
-victory_row(_, 2) :- false.
-victory_col(_, 1) :- true.
-victory_dgn(_, 3) :- true.
-
-winner(Board, Winner) :- 
-    victory_row(Board, Winner),!; 
-    victory_col(Board, Winner),!; 
-    victory_dgn(Board, Winner),!.
-
-victory(Board, Winner) :-
-    cross(Cross),
-    naught(Naught),
-    empty(Empty),
-    (   winner(Board, Cross) -> Winner = Cross
-    ;   winner(Board, Naught) -> Winner = Naught
-    ;   Winner = Empty
-    ).
-
-
-
-
-    % victory_row(Board, M, N, 1) ;
-    % victory_row(Board, M, N, -1) ;
-    % victory_col(Board, N, 1) ;
-    % victory_col(Board, N, -1) ;
-    % victory_diag(Board, N, 1) ;
-    % victory_diag(Board, N, -1).
-
-board0([1, 1, 1, 0]).
-board1([1, 1, 1, 0,   0, 0, 0, 0,     0, 0, 0, 0,    0, 0, 0, 0]).
-board2([1, -1, 1, -1,   0, 1, 0, 0,     -1, -1, 1, 0,    -1, -1, 0, 0]).
-
-%
-%
-% X 0 X 0
-% _ X _ _
-% 0 0 X _
-% 0 0 _ _
-%
-%
-% [1, -1, 1, -1,   0, 1, 0, 0,     -1, -1, 1, 0,    -1, -1, 0, 0]
-%
-%
+all_victory_sequences(Board, Sequences) :-
+    all_victory_rows(Board, Rows),
+    all_victory_cols(Board, Cols),
+    all_victory_dgns(Board, Dgns),
+    append(Rows, Cols, RC),
+    append(RC, Dgns, Sequences).

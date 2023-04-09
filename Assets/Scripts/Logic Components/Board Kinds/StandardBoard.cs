@@ -11,9 +11,9 @@ namespace App.Logic_Components.Boards
         private readonly int _Cols;
 
         public int Rows => _Rows;
-
         public int Cols => _Cols;
 
+        public IEnumerable<BoardValues> Values => _Values;
         public BoardValues this[int m, int n] => _Values[m * Cols + n];
 
         public StandardBoard(int rows, int cols) : 
@@ -25,11 +25,6 @@ namespace App.Logic_Components.Boards
             _Values = values.ToList();
             _Rows = rows;
             _Cols = cols;
-        }
-
-        public override string ToString()
-        {
-            return "[" + string.Join(", ", _Values.Select(n => (int)n)) + "]";
         }
     }
 }
