@@ -13,16 +13,7 @@ namespace App.Logic_Components.Boards
         public int Cols => _Cols;
 
         public IEnumerable<ICell> Cells => _Cells;
-        public CellValue this[int m, int n] => _Cells[m * Cols + n].Value;
-
-        //public StandardBoard(int rows, int cols) : 
-        //    this
-        //    (
-        //        rows, 
-        //        cols, 
-        //        Enumerable.Repeat(BoardValues.EMPTY, rows * cols).ToList()
-        //    )
-        //{ }
+        public ICell this[int m, int n] => _Cells[m * Cols + n];
 
         public StandardBoard(int rows, int cols, IEnumerable<ICell> values)
         {

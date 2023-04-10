@@ -72,6 +72,8 @@ namespace World.UI.Board.CellKinds
         #region Mono Behaviour
         public void Awake()
         {
+            _value = CellValue.EMPTY;
+            _state = CellState.DEFAULT;
             var shapeGameObject = _shapeSpriteRenderer.gameObject;
             _shapeMouseInteractable = shapeGameObject.GetComponent<MouseInteractable>();
         }
