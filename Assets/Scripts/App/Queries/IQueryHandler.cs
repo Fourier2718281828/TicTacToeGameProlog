@@ -6,7 +6,7 @@ namespace App.Queries
 {
     public interface IQueryHandler
     {
-        public IBoard NextBoard(IBoard currBoard, BoardValues currentPlayer);
+        public IBoard NextBoard(IBoard currBoard, CellValue currentPlayer);
         public IEnumerable<IEnumerable<int>> VictorySequences(IBoard currBoard);
     }
 }

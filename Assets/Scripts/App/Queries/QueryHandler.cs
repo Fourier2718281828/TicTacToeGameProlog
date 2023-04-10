@@ -6,6 +6,8 @@ using System;
 using App.Queries.Formatting;
 using UnityEngine;
 
+using World.UI.Board.CellKinds;
+
 namespace App.Queries
 {
     public class QueryHandler : IQueryHandler
@@ -28,34 +30,32 @@ namespace App.Queries
 
         private void InitSwipl()
         {
-            const int m = 3, n = 3;
             _swipl.Consult(PL_FILENAME);
 
+            //const int m = 3, n = 3;
             //SetBoardValues();
             //SetPrologDimensions(m, n);
 
 
-            BoardValues[] lst = new BoardValues[m * n]
-            {
-                BoardValues.NAUGHT,
-                BoardValues.NAUGHT,
-                BoardValues.NAUGHT,
-                
-                BoardValues.EMPTY,
-                BoardValues.NAUGHT,
-                BoardValues.EMPTY,
-
-                BoardValues.EMPTY,
-                BoardValues.EMPTY,
-                BoardValues.NAUGHT,
-            };
-            IBoard curr = new StandardBoard(m, n, lst);
-            VictorySequences(curr);
-            NextBoard(curr, BoardValues.NAUGHT);
+            //CellValue[] lst = new CellValue[m * n]
+            //{
+            //    CellValue.NAUGHT,
+            //    CellValue.NAUGHT,
+            //    CellValue.NAUGHT,
+            //    CellValue.EMPTY,
+            //    CellValue.NAUGHT,
+            //    CellValue.EMPTY,
+            //    CellValue.EMPTY,
+            //    CellValue.EMPTY,
+            //    CellValue.NAUGHT,
+            //};
+            //IBoard curr = new StandardBoard(m, n, lst);
+            //VictorySequences(curr);
+            //NextBoard(curr, CellValue.NAUGHT);
         }
 
         #region IBoard Methods
-        public IBoard NextBoard(IBoard currBoard, BoardValues currentPlayer)
+        public IBoard NextBoard(IBoard currBoard, CellValue currentPlayer)
         {
             ExecuteQuery(QueryFormat
             (
@@ -94,9 +94,9 @@ namespace App.Queries
         {
             foreach (var solution in _swipl.SolutionIterator)
             {
-                Debug.Log(solution.ToString());
                 foreach (var f in solution.VarValuesIterator)
                 {
+                    if (f.DataType == "namedvar") continue;
                     var strRep = f.Value.ToString();
                     processor(strRep);
                 }
@@ -116,8 +116,8 @@ namespace App.Queries
 
         private void SetBoardValues()
         {
-            var values = Enum.GetValues(typeof(BoardValues));
-            foreach(BoardValues value in values)
+            var values = Enum.GetValues(typeof(CellValue));
+            foreach(CellValue value in values)
             {
                 SetPrologBoardValue
                 (
@@ -136,11 +136,11 @@ namespace App.Queries
                     value.ToString()
                 ));
 
-        private string ToPrologPredicateName(BoardValues val) => val switch
+        private string ToPrologPredicateName(CellValue val) => val switch
         {
-            BoardValues.EMPTY  => "empty",
-            BoardValues.CROSS  => "cross",
-            BoardValues.NAUGHT => "naught",
+            CellValue.EMPTY  => "empty",
+            CellValue.CROSS  => "cross",
+            CellValue.NAUGHT => "naught",
             _                  => ""
         };
 
@@ -159,7 +159,7 @@ namespace App.Queries
             res += cut 
                 ? "),!."
                 : ").";
-            Debug.Log("Query: " + res);
+
             return res;
         }
         #endregion

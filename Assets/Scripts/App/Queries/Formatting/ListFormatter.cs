@@ -10,7 +10,7 @@ namespace App.Queries.Formatting
 {
     public class ListFormatter : IBoardPrologFormatter
     {
-        public IEnumerable<BoardValues> ToBoardFormat(string plrep)
+        public IEnumerable<CellValue> ToBoardFormat(string plrep)
         {
             try
             {
@@ -19,7 +19,7 @@ namespace App.Queries.Formatting
                     .Split(", ")
                     .Select
                     (
-                        elem => (BoardValues)Enum.Parse(typeof(BoardValues), elem)
+                        elem => (CellValue)Enum.Parse(typeof(CellValue), elem)
                     );
 
             }
@@ -32,7 +32,7 @@ namespace App.Queries.Formatting
 
         public string ToPrologFormat(IBoard board)
         {
-            return "[" + string.Join(", ", board.Values.Select(n => (int)n)) + "]";
+            return "[" + string.Join(", ", board.Cells.Select(c => (int)(c.Value))) + "]";
         }
     }
 }

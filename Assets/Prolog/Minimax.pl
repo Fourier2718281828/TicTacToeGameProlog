@@ -46,8 +46,6 @@ nth0(N, [Head|Tail], Elem, [Head|Rest]) :-
     var(N),                
     nth0(M, Tail, Elem, Rest),     
     N is M+1.
-
-
     
 grid_index(Index, I, J) :-
     n(N),
@@ -184,16 +182,13 @@ process_next_board(NextBoard, CurrPlayer, Comparator, AccIn, Gain) :-
     opponent(CurrPlayer, Opponent),
     opposite_comparator(Comparator, OppositeComparator),
     PArgs = [eval_unit_gain, OppositeComparator, NextBoard, Opponent],
-    %writeln(PArgs),
     for_each(PArgs, NextBoard, AccIn, Gain),!.
 
 eval_unit_gain(Comparator, Board, CurrPlayer, Elem, Index, AccIn, AccNext) :- 
     empty(Elem),
-    %write(Index), write(': '),
     replace_at(Index, Board, CurrPlayer, NextBoard),
     process_next_board(NextBoard, CurrPlayer, Comparator, AccIn, Gain),
     call(Comparator, AccIn, Gain, Minmax), 
-    %write('min('), write((AccIn, Gain)), write(') = '),writeln(Minmax),
     AccNext = Minmax,!.
 eval_unit_gain(_, _, _, _, _, AccIn, AccIn).
 
@@ -208,7 +203,7 @@ process_unit(_, _, _, _, _, AccIn, AccIn).
 decide(UnitProcessor, Board, CurrPlayer, Index) :- 
     PArgs = [UnitProcessor, Board, CurrPlayer],
     for_each(PArgs, Board, [], Tuples),
-    fmax_list(Tuples, compare_tuples0, Index).
+    fmax_list(Tuples, compare_tuples0, (_, Index)).
 
 minimax_unit(Board, CurrPlayer, Elem, Index, AccIn, AccNext) :-
     process_unit(max, Board, CurrPlayer, Elem, Index, AccIn, AccNext).

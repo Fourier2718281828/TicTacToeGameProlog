@@ -7,6 +7,6 @@ namespace App.Queries.Formatting
     public interface IBoardPrologFormatter
     {
         public string ToPrologFormat(IBoard board);
-        public IEnumerable<BoardValues> ToBoardFormat(string plrep);
+        public IEnumerable<CellValue> ToBoardFormat(string plrep);
     }
 }

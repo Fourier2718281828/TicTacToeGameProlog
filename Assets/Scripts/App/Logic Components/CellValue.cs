@@ -1,6 +1,6 @@
 ﻿namespace App.Logic_Components
 {
-    public enum BoardValues
+    public enum CellValue
     {
         EMPTY,
         CROSS,
