@@ -18,7 +18,9 @@ namespace World.UI.Board
         private void Awake()
         {
             _transform = GetComponent<RectTransform>();
-            Init(3, 3);
+            int cols = PlayerPrefs.GetInt("cols");
+            int rows = PlayerPrefs.GetInt("rows");
+            Init(rows, cols);
         }
 
         public void Init(int rows, int cols)
