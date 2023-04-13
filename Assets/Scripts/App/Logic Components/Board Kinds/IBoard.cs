@@ -10,3 +10,4 @@ namespace App.Logic_Components.Boards
         public int Cols { get; }
     }
 }
+    

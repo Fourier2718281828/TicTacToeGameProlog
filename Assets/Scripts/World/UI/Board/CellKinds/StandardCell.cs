@@ -10,7 +10,7 @@ namespace World.UI.Board.CellKinds
         private CellValue _value;
         private CellState _state;
 
-        private MouseInteractable _shapeMouseInteractable;
+        [SerializeField] private MouseInteractable _shapeMouseInteractable;
 
         [SerializeField] private SpriteRenderer _backSpriteRenderer;
         [SerializeField] private SpriteRenderer _shapeSpriteRenderer;
@@ -43,6 +43,8 @@ namespace World.UI.Board.CellKinds
                 SetBackground(value);
             }
         }
+
+        public GameObject GameObject => gameObject;
 
         private void SetBackground(CellState state)
         {
