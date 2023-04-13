@@ -7,6 +7,7 @@ using App.Queries.Formatting;
 using UnityEngine;
 
 using World.UI.Board.CellKinds;
+using System.Threading.Tasks;
 
 namespace App.Queries
 {
@@ -34,7 +35,7 @@ namespace App.Queries
         }
 
         #region IBoard Methods
-        public int? NextBoard(IBoard currBoard, CellValue currentPlayer)
+        public async Task<int?> NextBoard(IBoard currBoard, CellValue currentPlayer)
         {
             int? result = null;
             ExecuteQuery(QueryFormat
@@ -45,7 +46,7 @@ namespace App.Queries
                 ((int)currentPlayer).ToString(),
                 "X"
             ));
-            ProcessSolutions
+            await ProcessSolutions
             (
                 val => 
                 {
@@ -63,11 +64,11 @@ namespace App.Queries
             return result;
         }
 
-        public IEnumerable<IEnumerable<CellValue>> VictorySequences(IBoard currBoard) 
+        public async Task<IEnumerable<IEnumerable<CellValue>>> VictorySequences(IBoard currBoard) 
         {
             IEnumerable<IEnumerable<CellValue>> res = new List<List<CellValue>>();
             ExecuteQuery(QueryFormat(false, PL_VICTORY_SEQUENCES_NAME, _formatter.ToPrologFormat(currBoard), "X"));
-            ProcessSolutions
+            await ProcessSolutions
             (
                 val => 
                 {
@@ -80,17 +81,20 @@ namespace App.Queries
         #endregion
 
         #region Prolog Interaction
-        private void ProcessSolutions(SolutionValuesProcessor processor)
+        private async Task ProcessSolutions(SolutionValuesProcessor processor)
         {
-            foreach (var solution in _swipl.SolutionIterator)
+            await Task.Run(() =>
             {
-                foreach (var f in solution.VarValuesIterator)
+                foreach (var solution in _swipl.SolutionIterator)
                 {
-                    if (f.DataType == "namedvar") continue;
-                    var strRep = f.Value.ToString();
-                    processor(strRep);
+                    foreach (var f in solution.VarValuesIterator)
+                    {
+                        if (f.DataType == "namedvar") continue;
+                        var strRep = f.Value.ToString();
+                        processor(strRep);
+                    }
                 }
-            }
+            });
         }
 
         private void ExecuteQuery(string query) => _swipl.Query = query;
