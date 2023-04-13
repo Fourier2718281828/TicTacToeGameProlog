@@ -4,6 +4,7 @@ using App.Logic_Components.Boards;
 using App.Logic_Components;
 using System.Linq;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace App
 {
@@ -53,9 +54,9 @@ namespace App
             }
         }
 
-        private IEnumerable<IEnumerable<CellValue>> VictorySequences()
+        private async Task<IEnumerable<IEnumerable<CellValue>>> VictorySequences()
         {
-            return _queryHandler.VictorySequences(_board);
+            return await _queryHandler.VictorySequences(_board);
         }
 
         private CellValue? GetWinner(IEnumerable<IEnumerable<CellValue>> seqs)
@@ -66,17 +67,17 @@ namespace App
                 : list[0].Take(1).ToList()[0];
         }
 
-        private void ComputersTurn()
+        private async void ComputersTurn()
         {
-            int? index = _queryHandler.NextBoard(_board, _currentPlayer);
+            int? index = await _queryHandler.NextBoard(_board, _currentPlayer);
             if (index == null) return;
             _board[(int)index].Value = CellValue.NAUGHT;
-            if (CheckVictory()) return;
+            if (await CheckVictory()) return;
         }
 
-        private bool CheckVictory()
+        private async Task<bool> CheckVictory()
         {
-            var vicSeqs = VictorySequences();
+            var vicSeqs = await VictorySequences();
             var winner = GetWinner(vicSeqs);
 
             if (winner != null)
@@ -88,14 +89,14 @@ namespace App
             return false;
         }
 
-        private void OnCellInteraction(ICell cell)
+        private async void OnCellInteraction(ICell cell)
         {
             if(cell.Value == CellValue.EMPTY && _currentPlayer == CellValue.CROSS) //Non-computer's player cell value
             {
                 cell.Value = CellValue.CROSS;
-                if (CheckVictory()) return;
-                //_currentPlayer = CellValue.NAUGHT;
-                //ComputersTurn();
+                if (await CheckVictory()) return;
+                _currentPlayer = CellValue.NAUGHT;
+                ComputersTurn();
             }
         }
     }
