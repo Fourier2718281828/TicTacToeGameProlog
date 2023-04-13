@@ -20,7 +20,7 @@ namespace World.UI.Board
         private void Awake()
         {
             _transform = GetComponent<RectTransform>();
-            Init(3, 3);
+            Init(3, 5);
         }
 
         public void Init(int rows, int cols)
@@ -36,7 +36,6 @@ namespace World.UI.Board
             for(int i = 0; i < rows*cols; ++i)
             {
                 var go = Instantiate(_cellPrefab);
-                Debug.Log(go);
                 list.Add(go.GetComponent<IRenderableCell>());
             }
 
@@ -47,16 +46,12 @@ namespace World.UI.Board
         {
             var width = _transform.rect.width;
             var height = _transform.rect.height;
-            var colWidth = width / _board.Cols;
-            var rowHeight = height / _board.Rows;
-            var colHalfWidth  = 0.5f * colWidth;
-            var rowHalfHeight = 0.5f * rowHeight;
+            var cellWidth = width / _board.Cols;
+            var cellHeight = height / _board.Rows;
+            var cellHalfWidth  = 0.5f * cellWidth;
+            var cellHalfHeight = 0.5f * cellHeight;
+            var initPos = new Vector3(cellHalfWidth - width / 2, cellHalfHeight - height / 2, CELLS_APLICATE);
 
-            //Debug.Log($"Width {width}");
-            //Debug.Log($"Height {height}");
-            //Debug.Log($"colHalfWidth  {colHalfWidth }");
-            //Debug.Log($"rowHalfHeight {rowHalfHeight}");
-            var initPos = new Vector3(width, height, CELLS_APLICATE);
             for(int i = 0; i < _board.Rows; ++i)
             {
                 for(int j = 0; j < _board.Cols; ++j)
@@ -64,11 +59,11 @@ namespace World.UI.Board
                     
                     PositionCellAt(i, j, new Vector3
                         (
-                            colHalfWidth * (j + 1),
-                            rowHalfHeight * (i + 1),
+                            initPos.x + j * cellWidth,
+                            initPos.y + i * cellHeight,
                             CELLS_APLICATE
                         ));
-                    ScaleCellToSize(i, j, new(colWidth, rowHeight));
+                    ScaleCellToSize(i, j, new(cellWidth, cellHeight));
                 }
             }
         }
