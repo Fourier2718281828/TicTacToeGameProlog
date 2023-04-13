@@ -11,8 +11,6 @@ namespace World.UI.Board.CellKinds
         private CellValue _value;
         private CellState _state;
 
-        //[SerializeField] private MouseInteractable _shapeMouseInteractable;
-
         [SerializeField] private Image _backImage;
         [SerializeField] private Image _shapeImage;
 
@@ -75,26 +73,16 @@ namespace World.UI.Board.CellKinds
         #region Mono Behaviour
         public void Awake()
         {
-            _value = CellValue.EMPTY;
-            _state = CellState.DEFAULT;
+            Value = CellValue.EMPTY;
+            RenderedState = CellState.DEFAULT;
             var shapeGameObject = _shapeImage.gameObject;
-            //_shapeMouseInteractable = shapeGameObject.GetComponent<MouseInteractable>();
         }
 
-        //public void OnEnable()
-        //{
-        //    _shapeMouseInteractable.OnMouseDownEvent += OnInteracted;
-        //}
-
-        //public void OnDisable()
-        //{
-        //    _shapeMouseInteractable.OnMouseDownEvent -= OnInteracted;
-        //}
         #endregion
 
         public void OnInteracted()
         {
-            Debug.Log("Interacted");
+            Value = CellValue.CROSS;
         }
     }
 }
