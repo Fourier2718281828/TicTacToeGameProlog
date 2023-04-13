@@ -31,10 +31,17 @@ namespace World.UI.Board
         }
 
         private IEnumerable<IRenderableCell> GenerateCells(int rows, int cols)
-            => Enumerable
-                .Repeat(Instantiate(_cellPrefab), rows * cols)
-                .Select(go => go.GetComponent<IRenderableCell>())
-                .ToList();
+        {
+            List<IRenderableCell> list = new();
+            for(int i = 0; i < rows*cols; ++i)
+            {
+                var go = Instantiate(_cellPrefab);
+                Debug.Log(go);
+                list.Add(go.GetComponent<IRenderableCell>());
+            }
+
+            return list;
+        }
 
         private void FillBoard()
         {
@@ -45,28 +52,23 @@ namespace World.UI.Board
             var colHalfWidth  = 0.5f * colWidth;
             var rowHalfHeight = 0.5f * rowHeight;
 
-            Debug.Log($"Width {width}");
-            Debug.Log($"Height {height}");
-            Debug.Log($"colHalfWidth  {colHalfWidth }");
-            Debug.Log($"rowHalfHeight {rowHalfHeight}");
-
+            //Debug.Log($"Width {width}");
+            //Debug.Log($"Height {height}");
+            //Debug.Log($"colHalfWidth  {colHalfWidth }");
+            //Debug.Log($"rowHalfHeight {rowHalfHeight}");
+            var initPos = new Vector3(width, height, CELLS_APLICATE);
             for(int i = 0; i < _board.Rows; ++i)
             {
                 for(int j = 0; j < _board.Cols; ++j)
                 {
-                    Debug.Log(new Vector3
-                        (
-                            colHalfWidth * (j + 1),
-                            rowHalfHeight * (i + 1),
-                            CELLS_APLICATE
-                        ));
+                    
                     PositionCellAt(i, j, new Vector3
                         (
                             colHalfWidth * (j + 1),
                             rowHalfHeight * (i + 1),
                             CELLS_APLICATE
                         ));
-                    //ScaleCellToSize(i, j, new(colWidth, rowHeight));
+                    ScaleCellToSize(i, j, new(colWidth, rowHeight));
                 }
             }
         }
@@ -75,20 +77,19 @@ namespace World.UI.Board
         {
             var cell = _board.RenderableAt(i, j).GameObject;
             var cellTransform = cell.transform;
-            cellTransform.parent = gameObject.transform;
-            //cellTransform.position = pos;
+            cellTransform.SetParent(gameObject.transform);
+            var rectTransform = cellTransform.GetComponent<RectTransform>();
+            rectTransform.anchoredPosition = pos;
+            rectTransform.localPosition = new(rectTransform.localPosition.x, rectTransform.localPosition.y, pos.z);
         }
 
-        //private void ScaleCellToSize(int i, int j, Vector2 size)
-        //{
-        //    var cell = _board.RenderableAt(i, j).GameObject;
-        //    var renderer = cell.GetComponent<Renderer>();
-        //    var initialSize = renderer.bounds.size;
-        //    var scaleX = size.x / initialSize.x;
-        //    var scaleY = size.y / initialSize.y;
-        //    var scaleZ = cell.transform.localScale.z;
-        //    cell.transform.localScale = new(scaleX, scaleY, scaleZ);
-        //}
+        private void ScaleCellToSize(int i, int j, Vector2 size)
+        {
+            var cell = _board.RenderableAt(i, j).GameObject;
+            var rectTransform = cell.transform.GetComponent<RectTransform>();
+            rectTransform.sizeDelta = size;
+            rectTransform.localScale = new Vector3(1, 1, 1);
+        }
     }
 }
 

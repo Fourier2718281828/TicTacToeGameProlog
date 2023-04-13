@@ -16,6 +16,6 @@ namespace App.Utilities
         
         public void OnMouseExit()   => OnMouseExitEvent?.Invoke();
 
-        public void OnMouseOver()   => OnMouseEnterEvent?.Invoke();
+        public void OnMouseOver()   => OnMouseOverEvent?.Invoke();
     }
 }

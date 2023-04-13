@@ -2,6 +2,7 @@ using System;
 using App.Logic_Components;
 using App.Utilities;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace World.UI.Board.CellKinds
 {
@@ -12,8 +13,8 @@ namespace World.UI.Board.CellKinds
 
         [SerializeField] private MouseInteractable _shapeMouseInteractable;
 
-        [SerializeField] private SpriteRenderer _backSpriteRenderer;
-        [SerializeField] private SpriteRenderer _shapeSpriteRenderer;
+        [SerializeField] private Image _backImage;
+        [SerializeField] private Image _shapeImage;
 
         [SerializeField] private Sprite EMPTY_SHAPE;
         [SerializeField] private Sprite CROSS_SHAPE;
@@ -48,7 +49,7 @@ namespace World.UI.Board.CellKinds
 
         private void SetBackground(CellState state)
         {
-            _backSpriteRenderer.sprite = state switch
+            _backImage.sprite = state switch
             {
                 CellState.DEFAULT => DEFAULT_BACKGROUND,
                 CellState.WIN_STATE => WIN_BACKGROUND,
@@ -60,7 +61,7 @@ namespace World.UI.Board.CellKinds
 
         private void SetCellValueShape(CellValue value)
         {
-            _shapeSpriteRenderer.sprite = value switch
+            _shapeImage.sprite = value switch
             {
                 CellValue.EMPTY => EMPTY_SHAPE,
                 CellValue.CROSS => CROSS_SHAPE,
@@ -76,7 +77,7 @@ namespace World.UI.Board.CellKinds
         {
             _value = CellValue.EMPTY;
             _state = CellState.DEFAULT;
-            var shapeGameObject = _shapeSpriteRenderer.gameObject;
+            var shapeGameObject = _shapeImage.gameObject;
             _shapeMouseInteractable = shapeGameObject.GetComponent<MouseInteractable>();
         }
 
