@@ -11,7 +11,7 @@ namespace World.UI.Board.CellKinds
         private CellValue _value;
         private CellState _state;
 
-        [SerializeField] private MouseInteractable _shapeMouseInteractable;
+        //[SerializeField] private MouseInteractable _shapeMouseInteractable;
 
         [SerializeField] private Image _backImage;
         [SerializeField] private Image _shapeImage;
@@ -78,21 +78,21 @@ namespace World.UI.Board.CellKinds
             _value = CellValue.EMPTY;
             _state = CellState.DEFAULT;
             var shapeGameObject = _shapeImage.gameObject;
-            _shapeMouseInteractable = shapeGameObject.GetComponent<MouseInteractable>();
+            //_shapeMouseInteractable = shapeGameObject.GetComponent<MouseInteractable>();
         }
 
-        public void OnEnable()
-        {
-            _shapeMouseInteractable.OnMouseDownEvent += OnInteracted;
-        }
+        //public void OnEnable()
+        //{
+        //    _shapeMouseInteractable.OnMouseDownEvent += OnInteracted;
+        //}
 
-        public void OnDisable()
-        {
-            _shapeMouseInteractable.OnMouseDownEvent -= OnInteracted;
-        }
+        //public void OnDisable()
+        //{
+        //    _shapeMouseInteractable.OnMouseDownEvent -= OnInteracted;
+        //}
         #endregion
 
-        private void OnInteracted()
+        public void OnInteracted()
         {
             Debug.Log("Interacted");
         }

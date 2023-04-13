@@ -1,9 +1,7 @@
 using App.Logic_Components.Boards;
-using App.Logic_Components;
 using UnityEngine;
 using System.Collections.Generic;
 using World.UI.Board.CellKinds;
-using System.Linq;
 
 namespace World.UI.Board
 {
@@ -20,7 +18,7 @@ namespace World.UI.Board
         private void Awake()
         {
             _transform = GetComponent<RectTransform>();
-            Init(3, 5);
+            Init(3, 3);
         }
 
         public void Init(int rows, int cols)
