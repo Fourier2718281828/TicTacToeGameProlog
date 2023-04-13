@@ -1,6 +1,5 @@
 using System;
 using App.Logic_Components;
-using App.Utilities;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,6 +7,8 @@ namespace World.UI.Board.CellKinds
 {
     public class StandardCell : MonoBehaviour, IRenderableCell
     {
+        public event ICell.CellOperation OnInteraction;
+
         private CellValue _value;
         private CellState _state;
 
@@ -80,9 +81,6 @@ namespace World.UI.Board.CellKinds
 
         #endregion
 
-        public void OnInteracted()
-        {
-            Value = CellValue.CROSS;
-        }
+        public void OnInteracted() => OnInteraction?.Invoke(this);
     }
 }

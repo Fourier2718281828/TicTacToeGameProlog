@@ -18,7 +18,8 @@ namespace App.Logic_Components.Boards
 
         public IEnumerable<IRenderableCell> RenderableCells => _Cells;
 
-        public ICell this[int m, int n] => RenderableAt(m, n);
+        //public ICell this[int m, int n] => RenderableAt(m, n);
+        public ICell this[int index] => _Cells[index];
 
         public StandardBoard(int rows, int cols, IEnumerable<IRenderableCell> values)
         {

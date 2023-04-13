@@ -18,10 +18,10 @@ namespace App.Queries
         private const string PL_SET_DIMENSIONS_NAME = "set_dimensions";
         private const string PL_VICTORY_SEQUENCES_NAME = "all_victory_sequences";
         private const string PL_NEXT_TURN_NAME = "next_turn";
-        private IBoardPrologFormatter _formatter;
+        private IPrologFormatter _formatter;
         private PrologEngine _swipl;
 
-        public QueryHandler(IBoardPrologFormatter formatter)
+        public QueryHandler(IPrologFormatter formatter)
         {
             _formatter = formatter;
             _swipl = new PrologEngine(persistentCommandHistory : false);
@@ -31,32 +31,12 @@ namespace App.Queries
         private void InitSwipl()
         {
             _swipl.Consult(PL_FILENAME);
-
-            //const int m = 3, n = 3;
-            //SetBoardValues();
-            //SetPrologDimensions(m, n);
-
-
-            //CellValue[] lst = new CellValue[m * n]
-            //{
-            //    CellValue.NAUGHT,
-            //    CellValue.NAUGHT,
-            //    CellValue.NAUGHT,
-            //    CellValue.EMPTY,
-            //    CellValue.NAUGHT,
-            //    CellValue.EMPTY,
-            //    CellValue.EMPTY,
-            //    CellValue.EMPTY,
-            //    CellValue.NAUGHT,
-            //};
-            //IBoard curr = new StandardBoard(m, n, lst);
-            //VictorySequences(curr);
-            //NextBoard(curr, CellValue.NAUGHT);
         }
 
         #region IBoard Methods
-        public IBoard NextBoard(IBoard currBoard, CellValue currentPlayer)
+        public int? NextBoard(IBoard currBoard, CellValue currentPlayer)
         {
+            int? result = null;
             ExecuteQuery(QueryFormat
             (
                 true, 
@@ -69,23 +49,33 @@ namespace App.Queries
             (
                 val => 
                 {
-                    Debug.Log(val);
+                    int res;
+                    if(int.TryParse(val, out res))
+                    {
+                        result = res;
+                    }
+                    else
+                    {
+                        result = null;
+                    }
                 }
             );
-            return null;
+            return result;
         }
 
-        public IEnumerable<IEnumerable<int>> VictorySequences(IBoard currBoard) 
+        public IEnumerable<IEnumerable<CellValue>> VictorySequences(IBoard currBoard) 
         {
+            IEnumerable<IEnumerable<CellValue>> res = new List<List<CellValue>>();
             ExecuteQuery(QueryFormat(false, PL_VICTORY_SEQUENCES_NAME, _formatter.ToPrologFormat(currBoard), "X"));
             ProcessSolutions
             (
                 val => 
                 {
-                    Debug.Log(val);
+                    Debug.Log($"Prolog output: {val}");
+                    res = _formatter.DoubleListToEnumerable(val);
                 }
             );
-            return null;
+            return res;
         }
         #endregion
 
