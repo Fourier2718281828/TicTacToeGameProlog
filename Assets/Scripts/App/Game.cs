@@ -75,8 +75,16 @@ namespace App
         private async void ComputersTurn()
         {
             int? index = await _queryHandler.NextBoard(_board, _currentPlayer);
-            if (index == null) return;
-            _board[(int)index].Value = CellValue.NAUGHT;
+            if (index == null)
+            {
+                var nxtCell = _board.Cells.FirstOrDefault(el => el.Value == CellValue.EMPTY);
+                if (nxtCell == null) return;
+                nxtCell.Value = CellValue.NAUGHT;
+            }
+            else
+            {
+                _board[(int)index].Value = CellValue.NAUGHT;
+            }
             if (await CheckVictory()) return;
             _currentPlayer = CellValue.CROSS;
         }

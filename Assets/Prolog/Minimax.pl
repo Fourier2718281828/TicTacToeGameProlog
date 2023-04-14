@@ -149,7 +149,23 @@ within_one_col(Index0, Index1, Index2) :-
     grid_index(Index1, _, J),
     grid_index(Index2, _, J).
 
-within_one_dgn(_, _, _) :- true.
+within_one_dgn(Index0, Index1, Index2) :- 
+    shift_rght_down(Index0, Index1),
+    shift_rght_down(Index1, Index2),!.
+within_one_dgn(Index0, Index1, Index2) :- 
+    shift_rght_up(Index0, Index1),
+    shift_rght_up(Index1, Index2),!.
+within_one_dgn(Index0, Index1, Index2) :- 
+    shift_left_down(Index0, Index1),
+    shift_rght_up(Index0, Index2),!.
+within_one_dgn(Index0, Index1, Index2) :- 
+    shift_left_up(Index0, Index1),
+    shift_rght_down(Index0, Index2),!.
+% within_one_dgn(I0, I1, I2) :- within_one_dgn(I1, I0, I2).
+% within_one_dgn(I0, I1, I2) :- within_one_dgn(I1, I2, I0).
+% within_one_dgn(I0, I1, I2) :- within_one_dgn(I2, I1, I0).
+% within_one_dgn(I0, I1, I2) :- within_one_dgn(I0, I2, I1).
+% within_one_dgn(I0, I1, I2) :- within_one_dgn(I2, I0, I1).
 
 partial_victory_sequences(Board, ShiftPArgs, CheckIndexTripletPArgs, Sequences) :-
     PArgs = [find_win_sequence, Board, ShiftPArgs, CheckIndexTripletPArgs],
@@ -188,21 +204,18 @@ neighbourhood(I, [X, I, Z]) :- shift_left_up(I, X), shift_rght_down(I, Z).
 
 leads_to_victory(NextBoard, ChoiceIndex, CurrPlayer) :- 
     neighbourhood(ChoiceIndex, [X, Y, Z]),
-    % write([X, Y, Z]),
+    (
+        within_one_row(Z, Y, X);
+        within_one_col(Z, Y, X);
+        within_one_dgn(Z, Y, X)
+    ),
     nth0(Z, NextBoard, CurrPlayer),
     nth0(Y, NextBoard, CurrPlayer),
     nth0(X, NextBoard, CurrPlayer),!.
 
-% is_victory_board(Board, Winner) :- 
-%     all_victory_sequences(Board, VictorySequences),
-%     length(VictorySequences, L),
-%     L > 0,
-%     nth0(0, VictorySequences, [WinIndex | _]),
-%     nth0(WinIndex, Board, Winner), !.
-
 process_next_board(NextBoard, ChoiceIndex, CurrPlayer, _, _, Gain) :- 
-    % writeln(NextBoard),
     leads_to_victory(NextBoard, ChoiceIndex, CurrPlayer),
+    %write(CurrPlayer), write(': '),writeln(NextBoard),
     win_score(CurrPlayer, Gain),!.
 process_next_board(NextBoard, _, CurrPlayer, Comparator, AccIn, Gain) :-
     opponent(CurrPlayer, Opponent),
@@ -214,13 +227,19 @@ eval_unit_gain(Comparator, Board, CurrPlayer, Elem, Index, AccIn, AccNext) :-
     empty(Elem),
     replace_at(Index, Board, CurrPlayer, NextBoard),
     process_next_board(NextBoard, Index, CurrPlayer, Comparator, AccIn, Gain),
-    call(Comparator, AccIn, Gain, Minmax), 
-    AccNext = Minmax,!.
+    %write(Comparator),write((AccIn, Gain)), write(' = '),
+    ( AccIn == nothing ->
+        AccNext = Gain
+    ;
+        call(Comparator, AccIn, Gain, Minmax), 
+        %writeln(Minmax),
+        AccNext = Minmax
+    ),!.
 eval_unit_gain(_, _, _, _, _, AccIn, AccIn).
 
 process_unit(Comparator, Board, CurrPlayer, Elem, Index, AccIn, AccNext) :-
     empty(Elem),
-    EmptyAccIn is -2,
+    EmptyAccIn = nothing,
     eval_unit_gain(Comparator, Board, CurrPlayer, Elem, Index, EmptyAccIn, Gain),
     AccNext = [(Gain, Index) | AccIn].
 process_unit(_, _, _, _, _, AccIn, AccIn).
@@ -240,4 +259,45 @@ minimax(Board, CurrPlayer, Index) :- decide(minimax_unit, Board, CurrPlayer, Ind
 maximin(Board, CurrPlayer, Index) :- decide(maximin_unit, Board, CurrPlayer, Index).
 
 next_turn(_, CurrPlayer, -1) :- empty(CurrPlayer).
-next_turn(Board, CurrPlayer, Index) :- minimax(Board, CurrPlayer, Index).
+next_turn(Board, CurrPlayer, Index) :- maximin(Board, CurrPlayer, Index).
+
+
+max_tuple((X1, Y1), (X2, _), (X1, Y1)) :- X1 >= X2,!.
+max_tuple((_, _), (X2, Y2), (X2, Y2)).
+
+min_tuple((X1, Y1), (X2, _), (X1, Y1)) :- X1 =< X2,!.
+min_tuple((_, _), (X2, Y2), (X2, Y2)).
+
+opposite2(max_tuple, min_tuple).
+opposite2(min_tuple, max_tuple).
+
+unit(_, _, CurrPlayer, _, _, (Gain, Index), (Gain, Index)) :- win_score(CurrPlayer, Gain),!.
+unit(Comparator, Board, CurrPlayer, Elem, Index, AccIn, AccNext) :- 
+    % write('Called unit: '), writeln(Board),
+    empty(Elem),
+    replace_at(Index, Board, CurrPlayer, NextBoard),
+    (leads_to_victory(NextBoard, Index, CurrPlayer) ->
+        %writeln('Here'),
+        win_score(CurrPlayer, Gain),
+        AccNext = (Gain, Index),!
+    ;
+        opponent(CurrPlayer, NextPlayer),
+        opposite2(Comparator, NextComparator),
+        decide2(NextComparator, NextBoard, NextPlayer, NextTuple),
+        call(Comparator, AccIn, NextTuple, AccNext)
+    ),!.
+unit(_, _, _, _, _, X, X).
+
+% process_victory(_, NextBoard, CurrPlayer, Index, AccIn, AccNext) :-
+%         leads_to_victory(Board, Index, CurrPlayer),
+%         writeln('Here'),
+%         win_score(CurrPlayer, Gain),
+%         AccNext = (Gain, Index),!.
+% process_victory(Comparator, NextBoard, CurrPlayer, Index, AccIn, AccNext) :-
+
+decide2(Comparator, Board, CurrPlayer, Tuple) :- 
+    % write('Called decide: '), writeln(Board),
+    PArgs = [unit, Comparator, Board, CurrPlayer],
+    for_each(PArgs, Board, (-2, -1), Tuple).
+
+next(Board, CurrPlayer, Index) :- decide2(max_tuple, Board, CurrPlayer, (_, Index)).

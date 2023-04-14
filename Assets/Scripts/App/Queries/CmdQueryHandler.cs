@@ -15,7 +15,7 @@ namespace App.Queries
         private const string PL_SET_BOARD_VALUE_NAME = "set_board_value";
         private const string PL_SET_DIMENSIONS_NAME = "set_dimensions";
         private const string PL_VICTORY_SEQUENCES_NAME = "all_victory_sequences";
-        private const string PL_NEXT_TURN_NAME = "next_turn";
+        private const string PL_NEXT_TURN_NAME = "next";
         private CmdPrologEngine _swipl;
         private IPrologFormatter _formatter;
 
@@ -42,7 +42,7 @@ namespace App.Queries
             if (int.TryParse(val, out res))
             {
                 Debug.Log($"Prolog index = {res}");
-                result = res;
+                result = res == -1 ? null : res;
             }
 
             return result;
