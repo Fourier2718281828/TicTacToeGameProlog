@@ -31,45 +31,22 @@ namespace App.Queries
             Task.Run(async () =>
             {
                 await SendInput($"consult('{PL_FILENAME}').");
-                //var output = await Query(false, "next_turn", "Index",
-                //    "[0, 1, 1,  0, 0, 0,  0, 0, 0]", "2", "Index");
-                //UnityEngine.Debug.Log($"Output:{output}");([1, 1, 1,  0, 1, 0,  0, 0, 1], ).
-                var output = await Query(false, "all_victory_sequences", "Seq",
-                    "[1, 1, 1,  0, 1, 0,  0, 0, 1]", "Seq");
-                UnityEngine.Debug.Log($"Output:{output}");
-
+                //var output = await Query(false, "all_victory_sequences", "Seq",
+                //    "[1, 1, 1,  0, 1, 0,  0, 0, 1]", "Seq");
+                //UnityEngine.Debug.Log($"Output:{output}");
             });
 
-            //SendInput($"consult('{PL_FILENAME}').");
-            //var output = Query(false, "next_turn", "Index",
-            //    "[0, 1, 1,  0, 0, 0,  0, 0, 0]", "2", "Index");
-            //UnityEngine.Debug.Log($"Output:{output}");
         }
 
-        // send input
         async Task SendInput(string input)
         {
             await prologProcess.StandardInput.WriteLineAsync(input);
         }
 
-        // read output
         async Task<string> ReadOutput()
         {
             return await prologProcess.StandardOutput.ReadLineAsync();
         }
-
-        private async void TryExample()
-        {
-            await SendInput($"consult('{PL_FILENAME}').");
-            await SendInput("next_turn([0, 1, 1,  0, 0, 0,  0, 0, 0], 2, Index).");
-            string output;
-            while ((output = await ReadOutput()) != null)
-            {
-                UnityEngine.Debug.Log($"Output: {output}");
-            }
-            prologProcess.Close();
-        }
-
 
         public async Task<string> Query(bool cut, string predicateName, string outputVar, params string[] ps)
         {
@@ -94,7 +71,6 @@ namespace App.Queries
             string output;
             while ((output = await ReadOutput()) != null)
             {
-                //UnityEngine.Debug.Log($"Output: {output}");
                 if (output.StartsWith(outputVar))
                 {
                     return output.Substring((outputVar + " = ").Length).Trim('.');

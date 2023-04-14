@@ -1,10 +1,10 @@
 ﻿using App.Logic_Components;
 using App.Logic_Components.Boards;
+using App.Queries.Formatting;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 
 namespace App.Queries
@@ -17,26 +17,58 @@ namespace App.Queries
         private const string PL_VICTORY_SEQUENCES_NAME = "all_victory_sequences";
         private const string PL_NEXT_TURN_NAME = "next_turn";
         private CmdPrologEngine _swipl;
+        private IPrologFormatter _formatter;
 
-        public CmdQueryHandler()
+        public CmdQueryHandler(IPrologFormatter formatter)
         {
             _swipl = new CmdPrologEngine();
+            _formatter = formatter;
         }
 
         public async Task<int?> NextBoard(IBoard currBoard, CellValue currentPlayer)
         {
-            throw new NotImplementedException();
+            string val = await _swipl.Query
+            (
+                true,
+                PL_NEXT_TURN_NAME,
+                "X",
+                _formatter.ToPrologFormat(currBoard),
+                ((int)currentPlayer).ToString(),
+                "X"
+            );
+
+            int res;
+            int? result = null;
+            if (int.TryParse(val, out res))
+            {
+                Debug.Log($"Prolog index = {res}");
+                result = res;
+            }
+
+            return result;
         }
 
         public async Task<IEnumerable<IEnumerable<CellValue>>> VictorySequences(IBoard currBoard)
         {
-            throw new NotImplementedException();
+            IEnumerable<IEnumerable<CellValue>> res = new List<List<CellValue>>();
+            string val = await _swipl.Query
+            (
+                false, 
+                PL_VICTORY_SEQUENCES_NAME, 
+                "X", 
+                _formatter.ToPrologFormat(currBoard), 
+                "X"
+            );
+
+            Debug.Log($"Prolog output: {val}");
+            res = _formatter.DoubleListToEnumerable(val);
+            return res;
         }
 
 
         ///////////////////
-        private void SetPrologDimensions(int m, int n)
-            => _swipl.Query
+        public async void SetPrologDimensions(int m, int n)
+            => await _swipl.Query
                (
                   false,
                   PL_SET_DIMENSIONS_NAME,
@@ -44,12 +76,12 @@ namespace App.Queries
                   n.ToString()
                );
 
-        private void SetBoardValues()
+        public async void SetBoardValues()
         {
             var values = Enum.GetValues(typeof(CellValue));
             foreach (CellValue value in values)
             {
-                SetPrologBoardValue
+                await SetPrologBoardValue
                 (
                     ToPrologPredicateName(value),
                     (int)value
@@ -57,8 +89,8 @@ namespace App.Queries
             }
         }
 
-        private void SetPrologBoardValue(string name, int value)
-            => _swipl.Query
+        private async Task SetPrologBoardValue(string name, int value)
+            => await _swipl.Query
                (
                    false,
                    PL_SET_BOARD_VALUE_NAME,
