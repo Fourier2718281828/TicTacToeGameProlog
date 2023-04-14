@@ -23,6 +23,11 @@ namespace App
             _currentPlayer = CellValue.CROSS;
         }
 
+        private void OnDisable()
+        {
+            DetachEvents(_board);
+        }
+
         public void Init(IBoard board, IQueryHandler queryHandler)
         {
             SwitchToBoard(board);
@@ -73,6 +78,7 @@ namespace App
             if (index == null) return;
             _board[(int)index].Value = CellValue.NAUGHT;
             if (await CheckVictory()) return;
+            _currentPlayer = CellValue.CROSS;
         }
 
         private async Task<bool> CheckVictory()
@@ -82,6 +88,7 @@ namespace App
 
             if (winner != null)
             {
+                _currentPlayer = CellValue.EMPTY;
                 OnVictory?.Invoke((CellValue)winner);
                 return true;
             }

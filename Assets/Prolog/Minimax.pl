@@ -11,8 +11,8 @@ naught(1).
 cross(2).
 
 
-loss_score(-1).
-win_score(1).
+win_score(Cross, -1) :- cross(Cross).
+win_score(Naught, 1) :- naught(Naught).
 
 min(X, Y, X) :- X < Y,!. 
 min(_, Y, Y). 
@@ -130,8 +130,14 @@ find_win_sequence(OrigBoard, NextIndexPArgs, IndTripletCheckPArgs, Elem, Index0,
     AccNext = AccIn.
 
 shift_rght(Index, NxtIndex) :- NxtIndex is 1 + Index.
+shift_left(Index, NxtIndex) :- NxtIndex is Index - 1.
 shift_down(Index, NxtIndex) :- n(N), NxtIndex is N + Index.
-shift_diag(Index, NxtIndex) :- n(N), NxtIndex is 1 + N + Index.
+shift_up(Index, NxtIndex)   :- n(N), NxtIndex is Index - N.
+
+shift_rght_down(Index, NxtIndex) :- shift_rght(Index, Rght), shift_down(Rght, NxtIndex).
+shift_rght_up(Index, NxtIndex)   :- shift_rght(Index, Rght), shift_up(Rght, NxtIndex).
+shift_left_down(Index, NxtIndex) :- shift_left(Index, Rght), shift_down(Rght, NxtIndex).
+shift_left_up(Index, NxtIndex)   :- shift_left(Index, Rght), shift_up(Rght, NxtIndex).
 
 within_one_row(Index0, Index1, Index2) :-
     grid_index(Index0, I, _),
@@ -156,7 +162,7 @@ all_victory_cols(Board, Cols) :-
     partial_victory_sequences(Board, [shift_down], [within_one_col], Cols).
 
 all_victory_dgns(Board, Dgns) :-
-    partial_victory_sequences(Board, [shift_diag], [within_one_dgn], Dgns).
+    partial_victory_sequences(Board, [shift_rght_down], [within_one_dgn], Dgns).
 
 all_victory_sequences(Board, Sequences) :-
     all_victory_rows(Board, Rows),
@@ -165,20 +171,40 @@ all_victory_sequences(Board, Sequences) :-
     append(Rows, Cols, RC),
     append(RC, Dgns, Sequences).
 
-is_victory_board(Board, Winner) :- 
-    all_victory_sequences(Board, VictorySequences),
-    length(VictorySequences, L),
-    L > 0,
-    nth0(0, VictorySequences, [WinIndex | _]),
-    nth0(WinIndex, Board, Winner), !.
+neighbourhood(I, [I, Y, Z]) :- shift_up(I, Y)  , shift_up(Y, Z)  .
+neighbourhood(I, [I, Y, Z]) :- shift_rght(I, Y), shift_rght(Y, Z).
+neighbourhood(I, [I, Y, Z]) :- shift_down(I, Y), shift_down(Y, Z).
+neighbourhood(I, [I, Y, Z]) :- shift_left(I, Y), shift_left(Y, Z).
 
-get_score(CurrPlayer, Winner, Score) :- CurrPlayer =:= Winner, win_score(Score),!.
-get_score(_, _, Score) :- loss_score(Score).
+neighbourhood(I, [I, Y, Z]) :- shift_rght_up(I, Y), shift_rght_up(Y, Z).
+neighbourhood(I, [I, Y, Z]) :- shift_left_up(I, Y), shift_left_up(Y, Z).
+neighbourhood(I, [I, Y, Z]) :- shift_rght_down(I, Y), shift_rght_down(Y, Z).
+neighbourhood(I, [I, Y, Z]) :- shift_left_down(I, Y), shift_left_down(Y, Z).
 
-process_next_board(NextBoard, CurrPlayer, _, _, Gain) :- 
-    is_victory_board(NextBoard, Winner),
-    get_score(CurrPlayer, Winner, Gain),!.
-process_next_board(NextBoard, CurrPlayer, Comparator, AccIn, Gain) :-
+neighbourhood(I, [X, I, Z]) :- shift_up(I, X), shift_down(I, Z).
+neighbourhood(I, [X, I, Z]) :- shift_left(I, X), shift_rght(I, Z).
+neighbourhood(I, [X, I, Z]) :- shift_rght_up(I, X), shift_left_down(I, Z).
+neighbourhood(I, [X, I, Z]) :- shift_left_up(I, X), shift_rght_down(I, Z).
+
+leads_to_victory(NextBoard, ChoiceIndex, CurrPlayer) :- 
+    neighbourhood(ChoiceIndex, [X, Y, Z]),
+    % write([X, Y, Z]),
+    nth0(Z, NextBoard, CurrPlayer),
+    nth0(Y, NextBoard, CurrPlayer),
+    nth0(X, NextBoard, CurrPlayer),!.
+
+% is_victory_board(Board, Winner) :- 
+%     all_victory_sequences(Board, VictorySequences),
+%     length(VictorySequences, L),
+%     L > 0,
+%     nth0(0, VictorySequences, [WinIndex | _]),
+%     nth0(WinIndex, Board, Winner), !.
+
+process_next_board(NextBoard, ChoiceIndex, CurrPlayer, _, _, Gain) :- 
+    % writeln(NextBoard),
+    leads_to_victory(NextBoard, ChoiceIndex, CurrPlayer),
+    win_score(CurrPlayer, Gain),!.
+process_next_board(NextBoard, _, CurrPlayer, Comparator, AccIn, Gain) :-
     opponent(CurrPlayer, Opponent),
     opposite_comparator(Comparator, OppositeComparator),
     PArgs = [eval_unit_gain, OppositeComparator, NextBoard, Opponent],
@@ -187,15 +213,14 @@ process_next_board(NextBoard, CurrPlayer, Comparator, AccIn, Gain) :-
 eval_unit_gain(Comparator, Board, CurrPlayer, Elem, Index, AccIn, AccNext) :- 
     empty(Elem),
     replace_at(Index, Board, CurrPlayer, NextBoard),
-    process_next_board(NextBoard, CurrPlayer, Comparator, AccIn, Gain),
+    process_next_board(NextBoard, Index, CurrPlayer, Comparator, AccIn, Gain),
     call(Comparator, AccIn, Gain, Minmax), 
     AccNext = Minmax,!.
 eval_unit_gain(_, _, _, _, _, AccIn, AccIn).
 
 process_unit(Comparator, Board, CurrPlayer, Elem, Index, AccIn, AccNext) :-
     empty(Elem),
-    loss_score(LossScore),
-    EmptyAccIn is LossScore - 1,
+    EmptyAccIn is -2,
     eval_unit_gain(Comparator, Board, CurrPlayer, Elem, Index, EmptyAccIn, Gain),
     AccNext = [(Gain, Index) | AccIn].
 process_unit(_, _, _, _, _, AccIn, AccIn).
@@ -203,6 +228,7 @@ process_unit(_, _, _, _, _, AccIn, AccIn).
 decide(UnitProcessor, Board, CurrPlayer, Index) :- 
     PArgs = [UnitProcessor, Board, CurrPlayer],
     for_each(PArgs, Board, [], Tuples),
+    writeln(Tuples),
     fmax_list(Tuples, compare_tuples0, (_, Index)).
 
 minimax_unit(Board, CurrPlayer, Elem, Index, AccIn, AccNext) :-

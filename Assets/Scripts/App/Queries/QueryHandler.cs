@@ -94,6 +94,7 @@ namespace App.Queries
                         processor(strRep);
                     }
                 }
+                Debug.Log("PL finished");
             });
         }
 
