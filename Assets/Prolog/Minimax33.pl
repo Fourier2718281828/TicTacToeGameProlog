@@ -9,7 +9,7 @@ cross(2).
 :- dynamic m/1.
 :- dynamic n/1.
 
-depth_limit(3).
+depth_limit(4).
 
 
 win_score(Cross, -1) :- cross(Cross).

@@ -21,7 +21,9 @@ namespace App
         private void Start() 
         {
             Formatter = new ListFormatter();
-            QueryHandler = new CmdQueryHandler(Formatter);//new QueryHandler(Formatter);
+            int cols = PlayerPrefs.GetInt("cols");
+            int rows = PlayerPrefs.GetInt("rows");
+            QueryHandler = new CmdQueryHandler(Formatter, rows, cols);//new QueryHandler(Formatter);
             var cellArea = _objectsContainer.CellsArea.GetComponent<CellsArea>();
             _game.Init(cellArea.Board, QueryHandler);
         }

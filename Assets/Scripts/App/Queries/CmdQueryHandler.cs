@@ -19,9 +19,9 @@ namespace App.Queries
         private CmdPrologEngine _swipl;
         private IPrologFormatter _formatter;
 
-        public CmdQueryHandler(IPrologFormatter formatter)
+        public CmdQueryHandler(IPrologFormatter formatter, int rows, int cols)
         {
-            _swipl = new CmdPrologEngine();
+            _swipl = new CmdPrologEngine(rows, cols);
             _formatter = formatter;
         }
 
